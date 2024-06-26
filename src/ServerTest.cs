@@ -28,7 +28,7 @@ public class Tests
         // check that the identifier is the same in the sent data 
         var output = dnsMessage.ToBytesBigEndian();
         var sentData = new BitArray(output);
-        for (var i = 0; i < 24; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
+        for (var i = 0; i < 8 * 12; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
     }
 
     [Test]
@@ -222,5 +222,113 @@ public class Tests
         var bits = new BitArray(bytes);
 
         Assert.That(bits[23], Is.False);
+    }
+
+    [Test]
+    public void TestRecursionAvailableTrue()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            RecursionAvailable = true
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+
+        Assert.That(bits[24], Is.True);
+    }
+
+    [Test]
+    public void TestRecursionAvailableFalse()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            RecursionAvailable = false
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+
+        Assert.That(bits[24], Is.False);
+    }
+
+    [Test]
+    public void TestReservedTrue()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            Reserved = 0x7
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+        Assert.That(bits[25], Is.True);
+        Assert.That(bits[26], Is.True);
+        Assert.That(bits[27], Is.True);
+    }
+
+    [Test]
+    public void TestReservedFalse()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            Reserved = 0x0
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+        Assert.That(bits[25], Is.False);
+        Assert.That(bits[26], Is.False);
+        Assert.That(bits[27], Is.False);
+    }
+
+    [Test]
+    public void TestResponseCodeTrue()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            ResponseCode = 0xF // 1111
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+        Assert.That(bits[28], Is.True);
+        Assert.That(bits[29], Is.True);
+        Assert.That(bits[30], Is.True);
+        Assert.That(bits[31], Is.True);
+    }
+
+    [Test]
+    public void TestResponseCodeFalse()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            ResponseCode = 0x0 // 1111
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+        Assert.That(bits[28], Is.False);
+        Assert.That(bits[29], Is.False);
+        Assert.That(bits[30], Is.False);
+        Assert.That(bits[31], Is.False);
     }
 }
