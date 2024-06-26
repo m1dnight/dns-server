@@ -31,11 +31,24 @@ internal class Program
             var input = new BitArray(receivedData);
             var dnsMessage = Parser.ParseDnsMessage(input);
 
+            // settings for stage 2 
+            dnsMessage.Header.Identifier = 1234;
+            dnsMessage.Header.IsResponse = true;
+            dnsMessage.Header.OperationCode = 0;
+            dnsMessage.Header.AuthoritativeAnswer = false;
+            dnsMessage.Header.Truncated = false;
+            dnsMessage.Header.RecursionDesired = false;
+            dnsMessage.Header.RecursionAvailable = false;
+            dnsMessage.Header.Reserved = 0;
+            dnsMessage.Header.ResponseCode = 0;
+            dnsMessage.Header.QuestionCount = 0;
+            dnsMessage.Header.AnswerCount = 0;
+            dnsMessage.Header.AuthorityCount = 0;
+            dnsMessage.Header.AdditionalCount = 0;
 
-            // Create an empty response
-            var output = dnsMessage.ToBytes();
 
             // Send response
+            var output = dnsMessage.ToBytes();
             var outputString = BitConverter.ToString(output);
             Console.WriteLine($"Sent     {output.Length} bytes to   {sourceEndPoint}: {outputString}");
             udpClient.Send(output, output.Length, sourceEndPoint);
