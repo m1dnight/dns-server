@@ -12,8 +12,14 @@ public class Parser
         header.IsResponse = ParseIsResponse(bits);
         header.OperationCode = ParseOperationCode(bits);
         header.AuthoritativeAnswer = ParseAuthorativeAnswer(bits);
+        header.Truncated = ParseTruncated(bits);
 
         return new DnsMessage(header);
+    }
+
+    private static bool ParseTruncated(BitArray bits)
+    {
+        return bits[22];
     }
 
     private static bool ParseAuthorativeAnswer(BitArray bits)

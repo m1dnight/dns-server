@@ -8,7 +8,8 @@ public class Header : IToBytes
 
     public bool AuthoritativeAnswer { get; set; }
 
-    // public bool Truncated { get; set; }
+    public bool Truncated { get; set; }
+
     // public bool RecursionDesired { get; set; }
     // public bool RecursionAvailable { get; set; }
     // public ResponseCode ResponseCode { get; set; }
@@ -23,7 +24,8 @@ public class Header : IToBytes
         bytes[1] = (byte)Identifier;
         bytes[2] = (byte)((uint)(IsResponse ? 1 : 0)
                           | (OperationCode << 1)
-                          | (uint)(AuthoritativeAnswer ? 1 << 5 : 0));
+                          | (uint)(AuthoritativeAnswer ? 1 << 5 : 0)
+                          | (uint)(Truncated ? 1 << 6 : 0));
         return bytes;
     }
 
