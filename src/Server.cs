@@ -4,27 +4,35 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-Console.WriteLine("Logs from your program will appear here!");
-
-var ipAddress = IPAddress.Parse("127.0.0.1");
-var port = 2053;
-var udpEndPoint = new IPEndPoint(ipAddress, port);
-
-var udpClient = new UdpClient(udpEndPoint);
-
-while (true)
+internal class Program
 {
-    // Receive data
-    var sourceEndPoint = new IPEndPoint(IPAddress.Any, 0);
-    var receivedData = udpClient.Receive(ref sourceEndPoint);
-    var receivedString = Encoding.ASCII.GetString(receivedData);
+    private static void Main()
+    {
+        Console.WriteLine("Logs from your program will appear here!");
 
-    BitArray input = new BitArray(receivedData);
-    Console.WriteLine($"Received {receivedData.Length} bytes from {sourceEndPoint}: {receivedString}");
+        var ipAddress = IPAddress.Parse("127.0.0.1");
+        var port = 2053;
+        var udpEndPoint = new IPEndPoint(ipAddress, port);
 
-    // Create an empty response
-    var response = Encoding.ASCII.GetBytes("");
+        var udpClient = new UdpClient(udpEndPoint);
 
-    // Send response
-    udpClient.Send(response, response.Length, sourceEndPoint);
+        while (true)
+        {
+            // Receive data
+            var sourceEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            var receivedData = udpClient.Receive(ref sourceEndPoint);
+
+            Console.WriteLine(receivedData);
+            var receivedString = Encoding.ASCII.GetString(receivedData);
+
+            var input = new BitArray(receivedData);
+            Console.WriteLine($"Received {receivedData.Length} bytes from {sourceEndPoint}: {receivedString}");
+
+            // Create an empty response
+            var response = Encoding.ASCII.GetBytes("");
+
+            // Send response
+            udpClient.Send(response, response.Length, sourceEndPoint);
+        }
+    }
 }
