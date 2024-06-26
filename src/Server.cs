@@ -3,6 +3,7 @@ using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using codecrafters_dns_server;
 
 internal class Program
 {
@@ -22,17 +23,22 @@ internal class Program
             var sourceEndPoint = new IPEndPoint(IPAddress.Any, 0);
             var receivedData = udpClient.Receive(ref sourceEndPoint);
 
-            Console.WriteLine(receivedData);
-            var receivedString = Encoding.ASCII.GetString(receivedData);
-
-            var input = new BitArray(receivedData);
+            // print out bytes 
+            var receivedString = BitConverter.ToString(receivedData);
             Console.WriteLine($"Received {receivedData.Length} bytes from {sourceEndPoint}: {receivedString}");
 
+            // parse the message 
+            var input = new BitArray(receivedData);
+            var dnsMessage = Parser.ParseDnsMessage(input);
+
+
             // Create an empty response
-            var response = Encoding.ASCII.GetBytes("");
+            var output = dnsMessage.ToBytes();
 
             // Send response
-            udpClient.Send(response, response.Length, sourceEndPoint);
+            var outputString = BitConverter.ToString(output);
+            Console.WriteLine($"Sent     {output.Length} bytes to   {sourceEndPoint}: {outputString}");
+            udpClient.Send(output, output.Length, sourceEndPoint);
         }
     }
 }
