@@ -28,7 +28,7 @@ public class Tests
         // check that the identifier is the same in the sent data 
         var output = dnsMessage.ToBytesBigEndian();
         var sentData = new BitArray(output);
-        for (var i = 0; i < 16; i++) Assert.That(input[i], Is.EqualTo(sentData[i]));
+        for (var i = 0; i < 20; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
     }
 
     [Test]
@@ -69,7 +69,7 @@ public class Tests
         // construct message with response set to true.
         var header = new Header
         {
-            OperationCode = 0x7 // 111
+            OperationCode = 0xF // 1111
         };
         var dnsMessage = new DnsMessage(header);
 
@@ -79,6 +79,7 @@ public class Tests
         Assert.That(bits[17], Is.True);
         Assert.That(bits[18], Is.True);
         Assert.That(bits[19], Is.True);
+        Assert.That(bits[20], Is.True);
     }
 
     [Test]
@@ -97,6 +98,7 @@ public class Tests
         Assert.That(bits[17], Is.False);
         Assert.That(bits[18], Is.False);
         Assert.That(bits[19], Is.False);
+        Assert.That(bits[20], Is.False);
     }
 
     [Test]
@@ -105,7 +107,7 @@ public class Tests
         // construct message with response set to true.
         var header = new Header
         {
-            OperationCode = 0x5 // 000
+            OperationCode = 0x9 // 1001
         };
         var dnsMessage = new DnsMessage(header);
 
@@ -115,7 +117,8 @@ public class Tests
 
         Assert.That(bits[17], Is.True);
         Assert.That(bits[18], Is.False);
-        Assert.That(bits[19], Is.True);
+        Assert.That(bits[19], Is.False);
+        Assert.That(bits[20], Is.True);
     }
 
     [Test]

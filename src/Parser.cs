@@ -24,7 +24,7 @@ public class Parser
     private static uint ParseOperationCode(BitArray bits)
     {
         var opcodeBits = new BitArray(4);
-        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[i];
+        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[17 + i];
 
         var opcodeBytes = new byte[2];
         opcodeBits.CopyTo(opcodeBytes, 0);

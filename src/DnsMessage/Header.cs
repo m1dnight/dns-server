@@ -21,7 +21,9 @@ public class Header : IToBytes
         var bytes = new byte[12];
         bytes[0] = (byte)(Identifier >> 8);
         bytes[1] = (byte)Identifier;
-        bytes[2] = (byte)((uint)(IsResponse ? 1 : 0) | (OperationCode << 1) | (uint)(AuthoritativeAnswer ? 1 << 5 : 0));
+        bytes[2] = (byte)((uint)(IsResponse ? 1 : 0)
+                          | (OperationCode << 1)
+                          | (uint)(AuthoritativeAnswer ? 1 << 5 : 0));
         return bytes;
     }
 
