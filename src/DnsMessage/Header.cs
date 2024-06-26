@@ -10,7 +10,7 @@ public class Header : IToBytes
 
     public bool Truncated { get; set; }
 
-    // public bool RecursionDesired { get; set; }
+    public bool RecursionDesired { get; set; }
     // public bool RecursionAvailable { get; set; }
     // public ResponseCode ResponseCode { get; set; }
     // public uint QuestionCount { get; set; }
@@ -25,7 +25,8 @@ public class Header : IToBytes
         bytes[2] = (byte)((uint)(IsResponse ? 1 : 0)
                           | (OperationCode << 1)
                           | (uint)(AuthoritativeAnswer ? 1 << 5 : 0)
-                          | (uint)(Truncated ? 1 << 6 : 0));
+                          | (uint)(Truncated ? 1 << 6 : 0)
+                          | (uint)(RecursionDesired ? 1 << 7 : 0));
         return bytes;
     }
 

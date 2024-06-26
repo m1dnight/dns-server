@@ -13,8 +13,14 @@ public class Parser
         header.OperationCode = ParseOperationCode(bits);
         header.AuthoritativeAnswer = ParseAuthorativeAnswer(bits);
         header.Truncated = ParseTruncated(bits);
+        header.RecursionDesired = ParseRecursionDesired(bits);
 
         return new DnsMessage(header);
+    }
+
+    private static bool ParseRecursionDesired(BitArray bits)
+    {
+        return bits[23];
     }
 
     private static bool ParseTruncated(BitArray bits)

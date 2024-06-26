@@ -28,7 +28,7 @@ public class Tests
         // check that the identifier is the same in the sent data 
         var output = dnsMessage.ToBytesBigEndian();
         var sentData = new BitArray(output);
-        for (var i = 0; i < 22; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
+        for (var i = 0; i < 24; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
     }
 
     [Test]
@@ -188,5 +188,39 @@ public class Tests
         var bits = new BitArray(bytes);
 
         Assert.That(bits[22], Is.True);
+    }
+
+    [Test]
+    public void TestRecursionDesiredTrue()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            RecursionDesired = true
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+
+        Assert.That(bits[23], Is.True);
+    }
+
+    [Test]
+    public void TestRecursionDesiredFalse()
+    {
+        // construct message with response set to true.
+        var header = new Header
+        {
+            RecursionDesired = false
+        };
+        var dnsMessage = new DnsMessage(header);
+
+        // check the bit in the bytes.
+        var bytes = dnsMessage.ToBytesBigEndian();
+        var bits = new BitArray(bytes);
+
+        Assert.That(bits[23], Is.False);
     }
 }
