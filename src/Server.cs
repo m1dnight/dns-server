@@ -31,6 +31,7 @@ internal class Program
             var input = new BitArray(receivedData);
             var dnsMessage = Parser.ParseDnsMessage(input);
 
+            Console.WriteLine("Identifier: " + dnsMessage.Header.Identifier);
             // settings for stage 2 
             dnsMessage.Header.Identifier = 1234;
             dnsMessage.Header.IsResponse = true;
@@ -48,7 +49,12 @@ internal class Program
 
 
             // Send response
-            var output = dnsMessage.ToBytes();
+            var output = dnsMessage.ToBytesBigEndian();
+            
+            // test 
+            Console.WriteLine("is QR true: " + new BitArray(output)[16]);
+            
+            
             var outputString = BitConverter.ToString(output);
             Console.WriteLine($"Sent     {output.Length} bytes to   {sourceEndPoint}: {outputString}");
             udpClient.Send(output, output.Length, sourceEndPoint);

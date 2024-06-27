@@ -11,7 +11,57 @@ public class Tests
     }
 
     [Test]
-    public void TestIdentifier()
+    public void EndianSchmendian()
+    {
+        uint input = 256;
+        var bytes = new byte[2];
+        bytes[0] = (byte)(input >> 0);
+        bytes[1] = (byte)(input >> 8);
+
+        uint output = BitConverter.ToUInt16(bytes);
+
+        Assert.That(input, Is.EqualTo(output));
+    }
+
+    [Test]
+    public void EndianSchmendianBig()
+    {
+        var bytes = new byte[] { 0x04, 0xD2 };
+
+        uint output = BitConverter.ToUInt16(bytes);
+
+        Assert.That(output, Is.Not.EqualTo(1234));
+    }
+
+    [Test]
+    public void EndianSchmendianBigCorrect()
+    {
+        var bytes = new byte[] { 0x04, 0xD2 };
+        (bytes[0], bytes[1]) = (bytes[1], bytes[0]);
+        uint output = BitConverter.ToUInt16(bytes);
+
+        Assert.That(output, Is.EqualTo(1234));
+    }
+
+    [Test]
+    public void EndianSchmendianBigParseBit()
+    {
+        // input of 1234 in big endian 
+        var bytes = new byte[] { 0x04, 0xD2 };
+        var inputBits = new BitArray(bytes);
+        var outputBits = new BitArray(16);
+        for (var i = 0; i < 8; i++) outputBits[8 + i] = inputBits[i];
+        for (var i = 0; i < 8; i++) outputBits[i] = inputBits[8 + i];
+
+        var outputBytes = new byte[2];
+        outputBits.CopyTo(outputBytes, 0);
+        uint output = BitConverter.ToUInt16(outputBytes);
+        Assert.That(output, Is.EqualTo(1234));
+    }
+
+
+    [Test]
+    public void TestFullParse()
     {
         // these are the exact same bytes as the request, except the identifier which is different each time.
         var receivedData = new byte[]
@@ -24,11 +74,129 @@ public class Tests
         var input = new BitArray(receivedData);
         var dnsMessage = Parser.ParseDnsMessage(input);
 
-
-        // check that the identifier is the same in the sent data 
+        // convert the message back to output in big endian, should be exactly the same as the input
         var output = dnsMessage.ToBytesBigEndian();
         var sentData = new BitArray(output);
-        for (var i = 0; i < 8 * 12; i++) Assert.That(input[i], Is.EqualTo(sentData[i]), i.ToString, i.ToString());
+
+        var mismatches = new List<int>();
+        for (var i = 0; i < 8 * 12; i++)
+            if (input[i] != sentData[i])
+                mismatches.Add(i);
+
+        Assert.That(mismatches, Is.Empty);
+    }
+
+
+    [Test]
+    public void TestFullParseAdditionalCount()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x06, 0xA0, 0x01, 0x20, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x04, 0xD2, 0x0C, 0x63, 0x6F, 0x64, 0x65,
+            0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00, 0x01, 0x04, 0xD2
+        };
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+        Assert.That(dnsMessage.Header.AdditionalCount, Is.EqualTo(1234));
+    }
+
+
+    [Test]
+    public void TestFullParseAuthorityCount()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x06, 0xA0, 0x01, 0x20, 0x00, 0x01, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x00, 0x0C, 0x63, 0x6F, 0x64, 0x65,
+            0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00, 0x01, 0x04, 0xD2
+        };
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+        Assert.That(dnsMessage.Header.AuthorityCount, Is.EqualTo(1234));
+    }
+
+
+    [Test]
+    public void TestFullParseQuestionCount()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x06, 0xA0, 0x01, 0x20, 0x04, 0xD2, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00,
+            0x0C, 0x63, 0x6F, 0x64, 0x65, 0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00,
+            0x01, 0x04, 0xD2
+        };
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+        Assert.That(dnsMessage.Header.QuestionCount, Is.EqualTo(1234));
+    }
+
+
+    [Test]
+    public void TestFullParseAnswerCount()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x06, 0xA0, 0x01, 0x20, 0x00, 0x01, 0x04, 0xD2, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x63, 0x6F, 0x64, 0x65,
+            0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00, 0x01, 0x04, 0xD2
+        };
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+        Assert.That(dnsMessage.Header.AnswerCount, Is.EqualTo(1234));
+    }
+
+    [Test]
+    public void TestIdentifier1234()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x04, 0xD2, 0x01, 0x20, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x63, 0x6F, 0x64, 0x65,
+            0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00, 0x01, 0x00, 0x01
+        };
+
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+        Assert.That(dnsMessage.Header.Identifier, Is.EqualTo(1234));
+    }
+
+    [Test]
+    public void TestIdentifierParseBack()
+    {
+        // these are the exact same bytes as the request, except the identifier which is different each time.
+        var receivedData = new byte[]
+        {
+            0x04, 0xD2, 0x01, 0x20, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x63, 0x6F, 0x64, 0x65,
+            0x63, 0x72, 0x61, 0x66, 0x74, 0x65, 0x72, 0x73, 0x02, 0x69, 0x6F, 0x00, 0x00, 0x01, 0x00, 0x01
+        };
+
+        // parse the message 
+        var input = new BitArray(receivedData);
+        var dnsMessage = Parser.ParseDnsMessage(input);
+        Assert.That(dnsMessage.Header.Identifier, Is.EqualTo(1234));
+
+        var output = dnsMessage.ToBytesBigEndian();
+        var sentData = new BitArray(output);
+
+        var output2 = Parser.ParseDnsMessage(sentData);
+        Assert.That(output2.Header.Identifier, Is.EqualTo(1234));
     }
 
     [Test]
@@ -42,7 +210,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[16], Is.True);
     }
@@ -58,7 +226,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[16], Is.False);
     }
@@ -74,7 +242,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[17], Is.True);
         Assert.That(bits[18], Is.True);
@@ -93,7 +261,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[17], Is.False);
         Assert.That(bits[18], Is.False);
@@ -112,7 +280,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[17], Is.True);
@@ -132,7 +300,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Util.PrintHex(bytes, "bits");
@@ -150,7 +318,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[21], Is.False);
@@ -167,7 +335,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[22], Is.False);
@@ -184,7 +352,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[22], Is.True);
@@ -201,7 +369,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[23], Is.True);
@@ -218,7 +386,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[23], Is.False);
@@ -235,7 +403,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[24], Is.True);
@@ -252,7 +420,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
         Assert.That(bits[24], Is.False);
@@ -269,7 +437,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[25], Is.True);
         Assert.That(bits[26], Is.True);
@@ -287,7 +455,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[25], Is.False);
         Assert.That(bits[26], Is.False);
@@ -305,7 +473,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[28], Is.True);
         Assert.That(bits[29], Is.True);
@@ -324,7 +492,7 @@ public class Tests
         var dnsMessage = new DnsMessage(header);
 
         // check the bit in the bytes.
-        var bytes = dnsMessage.ToBytesBigEndian();
+        var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
         Assert.That(bits[28], Is.False);
         Assert.That(bits[29], Is.False);

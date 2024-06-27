@@ -29,8 +29,13 @@ public class Parser
 
     private static uint ParseAdditionalCount(BitArray bits)
     {
+        // big endian
         var identifierBits = new BitArray(16);
-        for (var i = 0; i < 16; i++) identifierBits[i] = bits[80 + i];
+        // for (var i = 0; i < 16; i++) identifierBits[i] = bits[80 + i];
+
+        var offset = 80;
+        for (var i = 0; i < 8; i++) identifierBits[8 + i] = bits[offset + i];
+        for (var i = 0; i < 8; i++) identifierBits[i] = bits[offset + 8 + i];
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);
@@ -39,8 +44,12 @@ public class Parser
 
     private static uint ParseAuthorityCount(BitArray bits)
     {
+        // big endian
         var identifierBits = new BitArray(16);
-        for (var i = 0; i < 16; i++) identifierBits[i] = bits[64 + i];
+        // for (var i = 0; i < 16; i++) identifierBits[i] = bits[64 + i];
+        var offset = 64;
+        for (var i = 0; i < 8; i++) identifierBits[8 + i] = bits[offset + i];
+        for (var i = 0; i < 8; i++) identifierBits[i] = bits[offset + 8 + i];
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);
@@ -49,8 +58,12 @@ public class Parser
 
     private static uint ParseAnswerCount(BitArray bits)
     {
+        // big endian
         var identifierBits = new BitArray(16);
-        for (var i = 0; i < 16; i++) identifierBits[i] = bits[48 + i];
+        // for (var i = 0; i < 16; i++) identifierBits[i] = bits[48 + i];
+        var offset = 48;
+        for (var i = 0; i < 8; i++) identifierBits[8 + i] = bits[offset + i];
+        for (var i = 0; i < 8; i++) identifierBits[i] = bits[offset + 8 + i];
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);
@@ -59,8 +72,13 @@ public class Parser
 
     private static uint ParseQuestionCount(BitArray bits)
     {
+        // big endian
         var identifierBits = new BitArray(16);
-        for (var i = 0; i < 16; i++) identifierBits[i] = bits[32 + i];
+        // for (var i = 0; i < 16; i++) identifierBits[i] = bits[32 + i];
+
+        var offset = 32;
+        for (var i = 0; i < 8; i++) identifierBits[8 + i] = bits[offset + i];
+        for (var i = 0; i < 8; i++) identifierBits[i] = bits[offset + 8 + i];
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);
@@ -124,8 +142,10 @@ public class Parser
 
     private static uint ParseIdentifier(BitArray bits)
     {
+        // identifier is big endian
         var identifierBits = new BitArray(16);
-        for (var i = 0; i < 16; i++) identifierBits[i] = bits[i];
+        for (var i = 0; i < 8; i++) identifierBits[8 + i] = bits[i];
+        for (var i = 0; i < 8; i++) identifierBits[i] = bits[8 + i];
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);

@@ -24,8 +24,8 @@ public class Header : IToBytes
     public byte[] ToBytes()
     {
         var bytes = new byte[12];
-        bytes[0] = (byte)(Identifier >> 8);
-        bytes[1] = (byte)Identifier;
+        bytes[0] = (byte)(Identifier >> 0);
+        bytes[1] = (byte)(Identifier >> 8);
 
         bytes[2] = (byte)((uint)(IsResponse ? 1 : 0)
                           | (OperationCode << 1)
@@ -37,17 +37,18 @@ public class Header : IToBytes
                           | (Reserved << 1)
                           | (ResponseCode << 4));
 
-        bytes[4] = (byte)(QuestionCount >> 8);
-        bytes[5] = (byte)QuestionCount;
-
-        bytes[6] = (byte)(AnswerCount >> 8);
-        bytes[7] = (byte)AnswerCount;
-
-        bytes[8] = (byte)(AuthorityCount >> 8);
-        bytes[9] = (byte)AuthorityCount;
-
-        bytes[10] = (byte)(AdditionalCount >> 8);
-        bytes[11] = (byte)AdditionalCount;
+        // 32
+        bytes[4] = (byte)(QuestionCount >> 0);
+        bytes[5] = (byte)(QuestionCount >> 8);
+        // 48
+        bytes[6] = (byte)(AnswerCount >> 0);
+        bytes[7] = (byte)(AnswerCount >> 8);
+        // 64 
+        bytes[8] = (byte)(AuthorityCount >> 0);
+        bytes[9] = (byte)(AuthorityCount >> 8);
+        // 80
+        bytes[10] = (byte)(AdditionalCount >> 0);
+        bytes[11] = (byte)(AdditionalCount >> 8);
         return bytes;
     }
 
