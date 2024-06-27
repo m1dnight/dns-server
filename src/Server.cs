@@ -50,11 +50,14 @@ internal class Program
 
             // Send response
             var output = dnsMessage.ToBytesBigEndian();
-            
-            // test 
-            Console.WriteLine("is QR true: " + new BitArray(output)[16]);
-            
-            
+
+            var bits = new BitArray(output);
+            bits[23] = true;
+            bits.CopyTo(output, 0);
+
+            Util.PrintHex(new BitArray(output), "bitarray");
+            Util.PrintHex(output, "bytes");
+
             var outputString = BitConverter.ToString(output);
             Console.WriteLine($"Sent     {output.Length} bytes to   {sourceEndPoint}: {outputString}");
             udpClient.Send(output, output.Length, sourceEndPoint);

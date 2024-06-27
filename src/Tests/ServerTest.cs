@@ -11,6 +11,53 @@ public class Tests
     }
 
     [Test]
+    public void ResponsePacket()
+    {
+        byte[] receivedData =
+        {
+            0x4B, 0x64, 0x81, 0x80, 0x00, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00
+        };
+        // parse the message 
+        var input = new BitArray(receivedData);
+
+        Util.PrintHex(input, " IN");
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+
+        Assert.That(dnsMessage.Header.IsResponse, Is.True);
+    }
+
+    [Test]
+    public void RequestPacket()
+    {
+        byte[] receivedData =
+        {
+            0x4B, 0x64, 0x01, 0x20, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+        };
+        // parse the message 
+        var input = new BitArray(receivedData);
+
+        Util.PrintHex(input, " IN");
+        var dnsMessage = Parser.ParseDnsMessage(input);
+
+
+        Assert.That(dnsMessage.Header.IsResponse, Is.False);
+    }
+
+    [Test]
+    public void BitOrder()
+    {
+        uint input = 1;
+        var bytes = BitConverter.GetBytes(input);
+        var bits = new BitArray(bytes);
+
+        Util.PrintHex(bytes, "bytes");
+        Util.PrintHex(bits, "bits");
+
+        Assert.That(bits[0], Is.True);
+    }
+
+    [Test]
     public void EndianSchmendian()
     {
         uint input = 256;
@@ -72,11 +119,15 @@ public class Tests
 
         // parse the message 
         var input = new BitArray(receivedData);
+
+        Util.PrintHex(input, " IN");
         var dnsMessage = Parser.ParseDnsMessage(input);
 
         // convert the message back to output in big endian, should be exactly the same as the input
         var output = dnsMessage.ToBytesBigEndian();
         var sentData = new BitArray(output);
+
+        Util.PrintHex(sentData, "OUT");
 
         var mismatches = new List<int>();
         for (var i = 0; i < 8 * 12; i++)
@@ -212,7 +263,7 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[16], Is.True);
+        Assert.That(bits[23], Is.True);
     }
 
     [Test]
@@ -228,7 +279,7 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[16], Is.False);
+        Assert.That(bits[23], Is.False);
     }
 
     [Test]
@@ -244,10 +295,10 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[17], Is.True);
-        Assert.That(bits[18], Is.True);
         Assert.That(bits[19], Is.True);
         Assert.That(bits[20], Is.True);
+        Assert.That(bits[21], Is.True);
+        Assert.That(bits[22], Is.True);
     }
 
     [Test]
@@ -263,10 +314,10 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[17], Is.False);
-        Assert.That(bits[18], Is.False);
         Assert.That(bits[19], Is.False);
         Assert.That(bits[20], Is.False);
+        Assert.That(bits[21], Is.False);
+        Assert.That(bits[22], Is.False);
     }
 
     [Test]
@@ -283,10 +334,10 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[17], Is.True);
-        Assert.That(bits[18], Is.False);
-        Assert.That(bits[19], Is.False);
-        Assert.That(bits[20], Is.True);
+        Assert.That(bits[19], Is.True);
+        Assert.That(bits[20], Is.False);
+        Assert.That(bits[21], Is.False);
+        Assert.That(bits[22], Is.True);
     }
 
     [Test]
@@ -304,7 +355,7 @@ public class Tests
         var bits = new BitArray(bytes);
 
         Util.PrintHex(bytes, "bits");
-        Assert.That(bits[21], Is.True);
+        Assert.That(bits[18], Is.True);
     }
 
     [Test]
@@ -321,7 +372,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[21], Is.False);
+        Assert.That(bits[18], Is.False);
     }
 
     [Test]
@@ -338,7 +389,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[22], Is.False);
+        Assert.That(bits[17], Is.False);
     }
 
     [Test]
@@ -355,7 +406,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[22], Is.True);
+        Assert.That(bits[17], Is.True);
     }
 
     [Test]
@@ -372,7 +423,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[23], Is.True);
+        Assert.That(bits[16], Is.True);
     }
 
     [Test]
@@ -389,7 +440,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[23], Is.False);
+        Assert.That(bits[16], Is.False);
     }
 
     [Test]
@@ -406,7 +457,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[24], Is.True);
+        Assert.That(bits[31], Is.True);
     }
 
     [Test]
@@ -423,7 +474,7 @@ public class Tests
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
 
-        Assert.That(bits[24], Is.False);
+        Assert.That(bits[31], Is.False);
     }
 
     [Test]
@@ -439,9 +490,9 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[25], Is.True);
-        Assert.That(bits[26], Is.True);
-        Assert.That(bits[27], Is.True);
+        Assert.That(bits[28], Is.True);
+        Assert.That(bits[29], Is.True);
+        Assert.That(bits[30], Is.True);
     }
 
     [Test]
@@ -457,9 +508,9 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[25], Is.False);
-        Assert.That(bits[26], Is.False);
-        Assert.That(bits[27], Is.False);
+        Assert.That(bits[28], Is.False);
+        Assert.That(bits[29], Is.False);
+        Assert.That(bits[30], Is.False);
     }
 
     [Test]
@@ -475,10 +526,10 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[28], Is.True);
-        Assert.That(bits[29], Is.True);
-        Assert.That(bits[30], Is.True);
-        Assert.That(bits[31], Is.True);
+        Assert.That(bits[24], Is.True);
+        Assert.That(bits[25], Is.True);
+        Assert.That(bits[26], Is.True);
+        Assert.That(bits[27], Is.True);
     }
 
     [Test]
@@ -494,9 +545,9 @@ public class Tests
         // check the bit in the bytes.
         var bytes = dnsMessage.ToBytes();
         var bits = new BitArray(bytes);
-        Assert.That(bits[28], Is.False);
-        Assert.That(bits[29], Is.False);
-        Assert.That(bits[30], Is.False);
-        Assert.That(bits[31], Is.False);
+        Assert.That(bits[24], Is.False);
+        Assert.That(bits[25], Is.False);
+        Assert.That(bits[26], Is.False);
+        Assert.That(bits[27], Is.False);
     }
 }

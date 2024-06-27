@@ -9,11 +9,13 @@ public class Parser
         // Parse the header
         var header = new Header();
         header.Identifier = ParseIdentifier(bits);
+
         header.IsResponse = ParseIsResponse(bits);
         header.OperationCode = ParseOperationCode(bits);
         header.AuthoritativeAnswer = ParseAuthorativeAnswer(bits);
         header.Truncated = ParseTruncated(bits);
         header.RecursionDesired = ParseRecursionDesired(bits);
+        
         header.RecursionAvailable = ParseRecursionAvailable(bits);
         header.Reserved = ParseReserved(bits);
         header.ResponseCode = ParseResponseCode(bits);
@@ -88,7 +90,7 @@ public class Parser
     private static uint ParseResponseCode(BitArray bits)
     {
         var opcodeBits = new BitArray(4);
-        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[28 + i];
+        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[24 + i];
 
         var opcodeBytes = new byte[2];
         opcodeBits.CopyTo(opcodeBytes, 0);
@@ -98,7 +100,7 @@ public class Parser
     private static uint ParseReserved(BitArray bits)
     {
         var opcodeBits = new BitArray(4);
-        for (var i = 0; i < 3; i++) opcodeBits[i] = bits[25 + i];
+        for (var i = 0; i < 3; i++) opcodeBits[i] = bits[28 + i];
 
         var opcodeBytes = new byte[2];
         opcodeBits.CopyTo(opcodeBytes, 0);
@@ -107,28 +109,28 @@ public class Parser
 
     private static bool ParseRecursionAvailable(BitArray bits)
     {
-        return bits[24];
+        return bits[31];
     }
 
     private static bool ParseRecursionDesired(BitArray bits)
     {
-        return bits[23];
+        return bits[16];
     }
 
     private static bool ParseTruncated(BitArray bits)
     {
-        return bits[22];
+        return bits[17];
     }
 
     private static bool ParseAuthorativeAnswer(BitArray bits)
     {
-        return bits[21];
+        return bits[18];
     }
 
     private static uint ParseOperationCode(BitArray bits)
     {
         var opcodeBits = new BitArray(4);
-        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[17 + i];
+        for (var i = 0; i < 4; i++) opcodeBits[i] = bits[19 + i];
 
         var opcodeBytes = new byte[2];
         opcodeBits.CopyTo(opcodeBytes, 0);
@@ -137,7 +139,7 @@ public class Parser
 
     private static bool ParseIsResponse(BitArray bits)
     {
-        return bits[16];
+        return bits[23];
     }
 
     private static uint ParseIdentifier(BitArray bits)
