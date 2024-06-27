@@ -3,14 +3,22 @@ using codecrafters_dns_server;
 
 public class DnsMessage : IToBytes
 {
+    public DnsMessage(Header header, List<Question> questions)
+    {
+        Header = header;
+        Questions = questions;
+    }
+
     public DnsMessage(Header header)
     {
         Header = header;
+        Questions = [];
     }
 
     public Header Header { get; set; }
 
-    // public Question[] Questions { get; set; }
+    public List<Question> Questions { get; set; }
+
     // public ResourceRecord[] Answers { get; set; }
     // public ResourceRecord[] Authority { get; set; }
     // public ResourceRecord[] Additional { get; set; }
@@ -18,6 +26,7 @@ public class DnsMessage : IToBytes
     {
         var bytes = new List<byte>();
         bytes.AddRange(Header.ToBytes());
+        foreach (var question in Questions) bytes.AddRange(question.ToBytes());
 
         return bytes.ToArray();
     }

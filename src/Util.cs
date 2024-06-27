@@ -24,7 +24,7 @@ public class Util
 
     public static void PrintHex(BitArray bits, string label)
     {
-        var bytes = new byte[bits.Length];
+        var bytes = new byte[bits.Length / 8];
         bits.CopyTo(bytes, 0);
         var str = ToHexString(bytes);
         Console.WriteLine($"{label,32}: {str}");
@@ -32,7 +32,7 @@ public class Util
 
     public static void PrintBinary(BitArray bits, string label)
     {
-        var bytes = new byte[bits.Length];
+        var bytes = new byte[bits.Length / 8];
         bits.CopyTo(bytes, 0);
         var str = ToBinaryString(bytes);
         Console.WriteLine($"{label,32}: {str}");

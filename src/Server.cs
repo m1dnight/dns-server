@@ -42,10 +42,16 @@ internal class Program
             dnsMessage.Header.RecursionAvailable = false;
             dnsMessage.Header.Reserved = 0;
             dnsMessage.Header.ResponseCode = 0;
-            dnsMessage.Header.QuestionCount = 0;
+            dnsMessage.Header.QuestionCount = 1;
             dnsMessage.Header.AnswerCount = 0;
             dnsMessage.Header.AuthorityCount = 0;
             dnsMessage.Header.AdditionalCount = 0;
+
+            var question = new Question()
+            {
+                Name = "codecrafters.io", Class = 1, Type = 1
+            };
+            dnsMessage.Questions.Add(question);
 
 
             // Send response
