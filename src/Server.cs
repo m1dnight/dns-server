@@ -51,10 +51,6 @@ internal class Program
             // Send response
             var output = dnsMessage.ToBytesBigEndian();
 
-            var bits = new BitArray(output);
-            bits[23] = true;
-            bits.CopyTo(output, 0);
-
             Util.PrintHex(new BitArray(output), "bitarray");
             Util.PrintHex(output, "bytes");
 
