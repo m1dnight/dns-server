@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using codecrafters_dns_server;
+using codecrafters_dns_server.DnsMessages;
 
 internal class Program
 {
@@ -29,33 +30,30 @@ internal class Program
 
             // parse the message 
             var input = new BitArray(receivedData);
-            var dnsMessage = Parser.ParseDnsMessage(input);
+            var dnsMessage = DnsMessage.Parse(input);
 
             Console.WriteLine("Identifier: " + dnsMessage.Header.Identifier);
             // settings for stage 2 
             dnsMessage.Header.Identifier = 1234;
-            dnsMessage.Header.IsResponse = true;
+            dnsMessage.Header.QueryResponseIndicator = true;
             dnsMessage.Header.OperationCode = 0;
             dnsMessage.Header.AuthoritativeAnswer = false;
-            dnsMessage.Header.Truncated = false;
+            dnsMessage.Header.Truncation = false;
             dnsMessage.Header.RecursionDesired = false;
             dnsMessage.Header.RecursionAvailable = false;
             dnsMessage.Header.Reserved = 0;
             dnsMessage.Header.ResponseCode = 0;
             dnsMessage.Header.QuestionCount = 1;
-            dnsMessage.Header.AnswerCount = 0;
-            dnsMessage.Header.AuthorityCount = 0;
-            dnsMessage.Header.AdditionalCount = 0;
+            dnsMessage.Header.AnswerRecordCount = 0;
+            dnsMessage.Header.AuthorityRecordCount = 0;
+            dnsMessage.Header.AdditionalRecordCount = 0;
 
-            var question = new Question()
-            {
-                Name = "codecrafters.io", Class = 1, Type = 1
-            };
+            var question = new Question("codecrafters.io", 1, 1);
             dnsMessage.Questions.Add(question);
 
 
             // Send response
-            var output = dnsMessage.ToBytesBigEndian();
+            var output = dnsMessage.ToBytes();
 
             Util.PrintHex(new BitArray(output), "bitarray");
             Util.PrintHex(output, "bytes");

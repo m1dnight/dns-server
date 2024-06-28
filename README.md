@@ -1,5 +1,22 @@
 [![progress-banner](https://backend.codecrafters.io/progress/dns-server/1947f5f4-171d-4d5e-9281-c5a1f97eb3ef)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
 
+# Create a test packet
+
+## Request
+
+```sh
+nc -u -l 1053 > query_packet.txt
+dig +retry=0 -p 1053 @127.0.0.1 +noedns vub.ac.be.com
+hexdump -e '16/1 "0x%02x, " "\n"'  query_packet.txt
+```
+
+## Response
+
+```sh
+nc -u 8.8.8.8 53 < query_packet.txt > response_packet.txt
+hexdump -e '16/1 "0x%02x, " "\n"' response_packet.txt
+```
+
 This is a starting point for C# solutions to the
 ["Build Your Own DNS server" Challenge](https://app.codecrafters.io/courses/dns-server/overview).
 
