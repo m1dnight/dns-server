@@ -22,6 +22,8 @@ public class DnsMessage(Header header, List<Question> questions, List<Answer> an
 
         foreach (var question in Questions) bytes.AddRange(question.ToBytes());
 
+        foreach (var answer in Answers) bytes.AddRange(answer.ToBytes());
+
         return bytes.ToArray();
     }
 
@@ -29,7 +31,8 @@ public class DnsMessage(Header header, List<Question> questions, List<Answer> an
     {
         var header = Header.Parse(bits);
         var questions = Question.ParseMany(bits, header.QuestionCount);
+        var answers = Answer.ParseMany(bits, header.AnswerRecordCount);
 
-        return new DnsMessage(header, questions, []);
+        return new DnsMessage(header, questions, answers);
     }
 }

@@ -37,7 +37,7 @@ public class Question(string name, uint type, uint clazz)
             // add the bytes of the label. 
             bytes.AddRange(Encoding.UTF8.GetBytes(label));
         }
-        
+
         bytes.Add(0x00);
 
 
@@ -85,7 +85,7 @@ public class Question(string name, uint type, uint clazz)
 
 
         // parse the labels
-        List<string> labels = new List<string>();
+        List<string> labels = new();
         for (var i = start; i < end; i++)
         {
             var labelLength = bytes[i];
@@ -96,7 +96,7 @@ public class Question(string name, uint type, uint clazz)
             i += labelLength;
         }
 
-        name = String.Join(".", labels);
+        name = string.Join(".", labels);
 
         // parse the type and class
         type = BitConverter.ToUInt16(bytes[^4..^2].Reverse().ToArray());
