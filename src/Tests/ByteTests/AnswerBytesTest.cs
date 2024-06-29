@@ -2,9 +2,9 @@ using System.Collections;
 using codecrafters_dns_server.DnsMessages;
 using NUnit.Framework;
 
-namespace codecrafters_dns_server.Tests.DnsMessageTests;
+namespace codecrafters_dns_server.Tests.ByteTests;
 
-public class AnswerTest
+public class AnswerBytesTest
 {
     // Response 
     private DnsMessage DnsMessageResponse { set; get; }
@@ -16,7 +16,6 @@ public class AnswerTest
     [OneTimeSetUp]
     public void RunBeforeAnyTests()
     {
-        // Response 
         BytesInResponse =
         [
             // header
@@ -43,13 +42,15 @@ public class AnswerTest
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Answers
+    /// 
     [Test]
-    public void TestAnswers()
+    public void ByteEqualLength()
     {
-        Assert.That(DnsMessageResponse.Header.QueryResponseIndicator, Is.EqualTo(true));
+        Util.PrintHex(BytesInResponse, "IN ");
+        Util.PrintHex(BytesOutResponse, "OUT");
+
         Assert.That(DnsMessageResponse.Header.AnswerRecordCount, Is.EqualTo(1));
-        var answer = DnsMessageResponse.Answers[0];
-        Assert.That(answer.Name, Is.EqualTo("google.com"));
+
+        Assert.That(BytesInResponse.Length, Is.EqualTo(BytesOutResponse.Length));
     }
 }

@@ -20,9 +20,13 @@ public class DnsMessage(Header header, List<Question> questions, List<Answer> an
 
         bytes.AddRange(Header.ToBytes());
 
-        foreach (var question in Questions) bytes.AddRange(question.ToBytes());
+        // if (Header.QueryResponseIndicator == false)
+            foreach (var question in Questions)
+                bytes.AddRange(question.ToBytes());
 
-        foreach (var answer in Answers) bytes.AddRange(answer.ToBytes());
+        // if (Header.QueryResponseIndicator == true)
+            foreach (var answer in Answers)
+                bytes.AddRange(answer.ToBytes());
 
         return bytes.ToArray();
     }

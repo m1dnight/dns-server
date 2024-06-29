@@ -28,39 +28,47 @@ internal class Program
             var receivedString = BitConverter.ToString(receivedData);
             Console.WriteLine($"Received {receivedData.Length} bytes from {sourceEndPoint}: {receivedString}");
 
+
             // parse the message 
             var input = new BitArray(receivedData);
             var dnsMessage = DnsMessage.Parse(input);
 
-            Console.WriteLine("Identifier: " + dnsMessage.Header.Identifier);
-            // settings for stage 2 
-            dnsMessage.Header.Identifier = 1234;
-            dnsMessage.Header.QueryResponseIndicator = true;
-            dnsMessage.Header.OperationCode = 0;
-            dnsMessage.Header.AuthoritativeAnswer = false;
-            dnsMessage.Header.Truncation = false;
-            dnsMessage.Header.RecursionDesired = false;
-            dnsMessage.Header.RecursionAvailable = false;
-            dnsMessage.Header.Reserved = 0;
-            dnsMessage.Header.ResponseCode = 0;
-            dnsMessage.Header.QuestionCount = 1;
-            dnsMessage.Header.AnswerRecordCount = 0;
-            dnsMessage.Header.AuthorityRecordCount = 0;
-            dnsMessage.Header.AdditionalRecordCount = 0;
-
-            var question = new Question("codecrafters.io", 1, 1);
-            dnsMessage.Questions.Add(question);
-
+            dnsMessage = CreateDnsMessage();
 
             // Send response
             var output = dnsMessage.ToBytes();
-
-            Util.PrintHex(new BitArray(output), "bitarray");
-            Util.PrintHex(output, "bytes");
+            
+            Util.PrintHex(receivedData, "input");
+            Util.PrintHex(output, "output");
 
             var outputString = BitConverter.ToString(output);
             Console.WriteLine($"Sent     {output.Length} bytes to   {sourceEndPoint}: {outputString}");
             udpClient.Send(output, output.Length, sourceEndPoint);
         }
+    }
+
+    private static DnsMessage CreateDnsMessage()
+    {
+        var header = new Header
+        {
+            Identifier = 1234,
+            QueryResponseIndicator = true,
+            OperationCode = 0,
+            AuthoritativeAnswer = false,
+            Truncation = false,
+            RecursionDesired = false,
+            RecursionAvailable = false,
+            Reserved = 0,
+            ResponseCode = 0,
+            QuestionCount = 1,
+            AnswerRecordCount = 1,
+            AuthorityRecordCount = 0,
+            AdditionalRecordCount = 0
+        };
+
+        var question = new Question("codecrafters.io", 1, 1);
+        var answer = new Answer("codecrafters.io", 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 });
+
+        return new DnsMessage(header, new List<Question> { question }, new List<Answer> { answer });
     }
 }

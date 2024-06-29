@@ -3,17 +3,19 @@ using System.Text;
 
 namespace codecrafters_dns_server.DnsMessages;
 
-public class Answer
+public class Answer(string name, uint type, uint clazz, uint ttl, uint dataLength, byte[] data)
 {
-    public string Name { get; set; }
-    public uint Type { get; set; }
-    public uint Class { get; set; }
-    public uint TTL { get; set; }
-    public uint DataLength { get; set; }
-    public byte[] Data { get; set; }
+    public string Name { get; set; } = name;
+    public uint Type { get; set; } = type;
+    public uint Class { get; set; } = clazz;
+    public uint TTL { get; set; } = ttl;
+    public uint DataLength { get; set; } = dataLength;
+    public byte[] Data { get; set; } = data;
 
     public byte[] ToBytes()
     {
+        var bytes = new List<byte>();
+
         /*
          * 0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
          * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
@@ -35,7 +37,25 @@ public class Answer
          * /                                               /
          * +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
          */
-        return [];
+        // split name into labels and prefix with byte for their length
+        var labels = Name.Split('.');
+        foreach (var label in labels)
+        {
+            bytes.Add((byte)label.Length);
+            // add the bytes of the label. 
+            bytes.AddRange(Encoding.UTF8.GetBytes(label));
+        }
+
+        bytes.Add(0x00);
+
+        // type and class in big endian 
+        bytes.AddRange(BitConverter.GetBytes((ushort)Type).Reverse());
+        bytes.AddRange(BitConverter.GetBytes((ushort)Class).Reverse());
+
+        bytes.AddRange(BitConverter.GetBytes(TTL).Reverse());
+        bytes.AddRange(BitConverter.GetBytes((ushort)DataLength).Reverse());
+        bytes.AddRange(Data);
+        return bytes.ToArray();
     }
 
     public static List<Answer> ParseMany(BitArray bits, uint answerCount)
@@ -63,6 +83,7 @@ public class Answer
             var rdLengthIndex = nullByte + 8 + 1;
 
             // read the length of the rdata 
+            var temp = bytes[rdLengthIndex..(rdLengthIndex + 2)];
             uint rdLength = BitConverter.ToUInt16(bytes[rdLengthIndex..(rdLengthIndex + 2)].Reverse().ToArray());
 
             end = rdLengthIndex + (int)rdLength;
@@ -104,25 +125,28 @@ public class Answer
         name = string.Join(".", labels);
 
         // parse the type, class, and ttl 
+        var typeS = nullByte + 1;
+        var typeE = nullByte + 3;
+        var tmp = bytes[(nullByte + 1)..(nullByte + 3)];
         type = BitConverter.ToUInt16(bytes[(nullByte + 1)..(nullByte + 3)].Reverse().ToArray());
-        clazz = BitConverter.ToUInt16(bytes[(nullByte + 4)..(nullByte + 6)].Reverse().ToArray());
-        ttl = BitConverter.ToUInt32(bytes[(nullByte + 7)..(nullByte + 11)].Reverse().ToArray());
-        rdLength = BitConverter.ToUInt16(bytes[(nullByte + 12)..(nullByte + 14)].Reverse().ToArray());
+        var clazzS = nullByte + 3;
+        var clazzE = nullByte + 5;
+        clazz = BitConverter.ToUInt16(bytes[(nullByte + 3)..(nullByte + 5)].Reverse().ToArray());
+
+        var ttlS = nullByte + 5;
+        var ttlE = nullByte + 9;
+        ttl = BitConverter.ToUInt32(bytes[(nullByte + 5)..(nullByte + 9)].Reverse().ToArray());
+
+        var rdLengthS = nullByte + 9;
+        var rdLengthE = nullByte + 11;
+        rdLength = BitConverter.ToUInt16(bytes[(nullByte + 9)..(nullByte + 11)].Reverse().ToArray());
 
         // parse the rdata 
-        var x = nullByte + 15;
-        var y = nullByte + 15 + (int)rdLength;
+        var x = nullByte + 11;
+        var y = nullByte + 11 + (int)rdLength;
         rData = bytes[x..y];
 
 
-        return new Answer
-        {
-            Name = name,
-            Type = type,
-            Class = clazz,
-            TTL = ttl,
-            DataLength = rdLength,
-            Data = rData
-        };
+        return new Answer(name, type, clazz, ttl, rdLength, rData);
     }
 }
