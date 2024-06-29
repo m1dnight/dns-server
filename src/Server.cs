@@ -40,9 +40,11 @@ internal class Program
             dnsMessage.Header.ResponseCode = 4;
             dnsMessage.Header.AnswerRecordCount = 1;
             
+            // requested domain 
+            var domain = dnsMessage.Questions[0].Name;
             dnsMessage.Answers = new List<Answer>
             {
-                new Answer("codecrafters.io", 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
+                new Answer(domain, 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
             };
             
             
