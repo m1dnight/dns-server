@@ -51,6 +51,7 @@ public class AnswerBytesTest
 
         Assert.That(DnsMessageResponse.Header.AnswerRecordCount, Is.EqualTo(1));
 
-        Assert.That(BytesInResponse.Length, Is.EqualTo(BytesOutResponse.Length));
+        // 51 because the question is in there too
+        Assert.That(BytesOutResponse.Length, Is.EqualTo(51));
     }
 }

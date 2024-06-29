@@ -38,14 +38,11 @@ internal class Program
             dnsMessage.Header.Truncation = false;
             dnsMessage.Header.RecursionAvailable = false;
             dnsMessage.Header.ResponseCode = 4;
-            dnsMessage.Header.AnswerRecordCount = 1;
+            dnsMessage.Header.AnswerRecordCount = 2;
 
             // requested domain 
-            var domain = dnsMessage.Questions[0].Name;
-            dnsMessage.Answers = new List<Answer>
-            {
-                new(domain, 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
-            };
+            foreach (var question in dnsMessage.Questions)
+                dnsMessage.Answers.Add(new Answer(question.Name, 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 }));
 
 
             // Send response

@@ -20,13 +20,13 @@ public class DnsMessage(Header header, List<Question> questions, List<Answer> an
 
         bytes.AddRange(Header.ToBytes());
 
-        if (Header.QueryResponseIndicator == false)
-            foreach (var question in Questions)
-                bytes.AddRange(question.ToBytes());
+        // if (Header.QueryResponseIndicator == false)
+        foreach (var question in Questions)
+            bytes.AddRange(question.ToBytes());
 
-        if (Header.QueryResponseIndicator == true)
-            foreach (var answer in Answers)
-                bytes.AddRange(answer.ToBytes());
+        // if (Header.QueryResponseIndicator == true)
+        foreach (var answer in Answers)
+            bytes.AddRange(answer.ToBytes());
 
         return bytes.ToArray();
     }
@@ -37,6 +37,6 @@ public class DnsMessage(Header header, List<Question> questions, List<Answer> an
         var questions = Question.ParseMany(bits, header.QuestionCount);
         var answers = Answer.ParseMany(bits, header.AnswerRecordCount);
 
-        return new DnsMessage(header, questions, answers);
+        return new DnsMessage(header, questions, []);
     }
 }
