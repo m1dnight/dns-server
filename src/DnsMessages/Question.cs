@@ -58,21 +58,31 @@ public class Question(string name, uint type, uint clazz)
         var start = 12;
         var end = -1;
         for (var qi = 0; qi < questionCount; qi++)
-        {
-            // find end of question (4 bytes after the null byte)
-            for (var i = start; i < bytes.Length; i++)
-                if (bytes[i] == 0x00)
-                {
-                    end = i + 4;
-                    break;
-                }
+            // if the message is compressed, the name is a pointer to the original name
+            // if ((bytes[start] & 0xC0) == 0xC0)
+            // {
+            //     // skip the pointer
+            //     start += 2;
+            //     questions.Add(Parse(bytes, start, start + 4));
+            //     start += 4;
+            //     continue;
+            // }
+            // else
+            // {
+                // find end of question (4 bytes after the null byte)
+                for (var i = start; i < bytes.Length; i++)
+                    if (bytes[i] == 0x00)
+                    {
+                        end = i + 4;
+                        break;
+                    }
+            // }
 
-            questions.Add(Parse(bytes, start, end));
+        questions.Add(Parse(bytes, start, end));
 
-            // set offsets for the next question
-            start = end + 1;
-            end = -1;
-        }
+        // set offsets for the next question
+        start = end + 1;
+        end = -1;
 
         return questions;
     }
@@ -86,6 +96,12 @@ public class Question(string name, uint type, uint clazz)
 
         // parse the labels
         List<string> labels = new();
+
+        // if the message is compressed, the name is a pointer to the original name
+        if ((bytes[start] & 0xC0) == 0xC0)
+        {
+        }
+
         for (var i = start; i < end; i++)
         {
             var labelLength = bytes[i];

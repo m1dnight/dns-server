@@ -17,7 +17,7 @@ nc -u 8.8.8.8 53 < query_packet.txt > response_packet.txt
 hexdump -e '16/1 "0x%02x, " "\n"' response_packet.txt
 ```
 
-## Generate a request packet 
+## Generate a request packet
 
 ```sh
 echo -n -e '\x04\xD2\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x0C\x63\x6F\x64\x65\x63\x72\x61\x66\x74\x65\x72\x73\x02\x69\x6F\x00\x00\x01\x00\x01' > custom_request.txt

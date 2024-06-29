@@ -36,21 +36,21 @@ internal class Program
             dnsMessage.Header.QueryResponseIndicator = true;
             dnsMessage.Header.AuthoritativeAnswer = false;
             dnsMessage.Header.Truncation = false;
-            dnsMessage.Header.RecursionAvailable = false; 
+            dnsMessage.Header.RecursionAvailable = false;
             dnsMessage.Header.ResponseCode = 4;
             dnsMessage.Header.AnswerRecordCount = 1;
-            
+
             // requested domain 
             var domain = dnsMessage.Questions[0].Name;
             dnsMessage.Answers = new List<Answer>
             {
-                new Answer(domain, 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
+                new(domain, 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
             };
-            
-            
+
+
             // Send response
             var output = dnsMessage.ToBytes();
-            
+
             Util.PrintHex(receivedData, "input");
             Util.PrintHex(output, "output");
 
