@@ -48,6 +48,7 @@ public class Question(string name, uint type, uint clazz)
         return bytes.ToArray();
     }
 
+
     public static List<Question> ParseMany(BitArray bits, uint questionCount)
     {
         var bytes = new byte[bits.Length / 8];
@@ -55,70 +56,75 @@ public class Question(string name, uint type, uint clazz)
 
         var questions = new List<Question>();
 
-        var start = 12;
-        var end = -1;
+        var questionStart = 12;
         for (var qi = 0; qi < questionCount; qi++)
-            // if the message is compressed, the name is a pointer to the original name
-            // if ((bytes[start] & 0xC0) == 0xC0)
-            // {
-            //     // skip the pointer
-            //     start += 2;
-            //     questions.Add(Parse(bytes, start, start + 4));
-            //     start += 4;
-            //     continue;
-            // }
-            // else
-            // {
-                // find end of question (4 bytes after the null byte)
-                for (var i = start; i < bytes.Length; i++)
-                    if (bytes[i] == 0x00)
-                    {
-                        end = i + 4;
-                        break;
-                    }
-            // }
-
-        questions.Add(Parse(bytes, start, end));
-
-        // set offsets for the next question
-        start = end + 1;
-        end = -1;
+        {
+            var question = Parse(bytes, ref questionStart);
+            questions.Add(question);
+        }
 
         return questions;
     }
 
-    private static Question Parse(byte[] bytes, int start, int end)
+    private static Question Parse(byte[] bytes, ref int start)
     {
-        var name = "";
-        uint type = 0;
-        uint clazz = 0;
-
-
-        // parse the labels
-        List<string> labels = new();
-
-        // if the message is compressed, the name is a pointer to the original name
-        if ((bytes[start] & 0xC0) == 0xC0)
-        {
-        }
-
-        for (var i = start; i < end; i++)
-        {
-            var labelLength = bytes[i];
-            if (labelLength == 0x00) break;
-
-            var label = Encoding.UTF8.GetString(bytes, i + 1, labelLength);
-            labels.Add(label);
-            i += labelLength;
-        }
-
-        name = string.Join(".", labels);
+        var name = ParseName(bytes, ref start);
 
         // parse the type and class
-        type = BitConverter.ToUInt16(bytes[^4..^2].Reverse().ToArray());
-        clazz = BitConverter.ToUInt16(bytes[^2..].Reverse().ToArray());
+        var type = BitConverter.ToUInt16(bytes[start..(start + 2)].Reverse().ToArray());
+        var clazz = BitConverter.ToUInt16(bytes[(start + 2)..(start + 4)].Reverse().ToArray());
+
+        // bump the pointer for the next question
+        start += 4;
 
 
         return new Question(name, type, clazz);
+    }
+
+    private static string ParseName(byte[] bytes, ref int start)
+    {
+        // parse labels until a pointer, or until 0x00
+        var labels = new List<string>();
+
+        while (bytes[start] != 0x00 && (bytes[start] & 0xC0) != 0xC0)
+        {
+            // parse a single label 
+            var label = ParseLabel(bytes, ref start);
+            labels.Add(label);
+        }
+
+        // if the end is a pointer, parse the pointer too.
+        if ((bytes[start] & 0xC0) == 0xC0)
+        {
+            var pointerBytes = new[] { bytes[start + 1], bytes[start] };
+            var labelPosition = BitConverter.ToUInt16(pointerBytes) & 0x3FFF;
+            var label = ParseName(bytes, ref labelPosition);
+            labels.Add(label);
+            start += 2;
+        }
+        else
+        {
+            // move pointer past null byte of labels 
+            start += 1;
+        }
+
+        return string.Join(".", labels);
+    }
+
+    private static string ParseLabel(byte[] bytes, ref int offset)
+    {
+        var labelLength = bytes[offset];
+        var label = Encoding.UTF8.GetString(bytes, offset + 1, labelLength);
+        offset += labelLength + 1;
+        return label;
+    }
+
+    private static string ParseCompressedLabel(byte[] bytes, ref int offset)
+    {
+        var pointerBytes = new byte[] { bytes[offset + 1], bytes[offset] };
+        var labelPosition = BitConverter.ToUInt16(pointerBytes) & 0x3FFF;
+        var label = ParseLabel(bytes, ref labelPosition);
+        offset += 2;
+        return label;
     }
 }

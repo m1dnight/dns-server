@@ -218,6 +218,10 @@ public class Header
 
     private static uint ParseQuestionCount(BitArray bits)
     {
+        var bytes = new byte[bits.Length / 8];
+        bits.CopyTo(bytes, 0);
+
+        var count = BitConverter.ToUInt16(bytes[4..6].Reverse().ToArray());
         // big endian
         var identifierBits = new BitArray(16);
         // for (var i = 0; i < 16; i++) identifierBits[i] = bits[32 + i];
@@ -228,7 +232,8 @@ public class Header
 
         var identifierBytes = new byte[2];
         identifierBits.CopyTo(identifierBytes, 0);
-        return BitConverter.ToUInt16(identifierBytes);
+        uint qc = BitConverter.ToUInt16(identifierBytes);
+        return qc;
     }
 
     private static uint ParseAnswerCount(BitArray bits)

@@ -63,4 +63,40 @@ public class QuestionTest
         var question = DnsMessageRequest.Questions[0];
         Assert.That(question.Name, Is.EqualTo("vub.ac.be.com"));
     }
+
+
+    [Test]
+    public void TestTwoQuestions()
+    {
+        byte[] bytesInRequest =
+        [
+            0x18, 0x2d, 0x01, 0x20, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+            
+            //q1
+            0x03, 0x76, 0x75, 0x62,
+            0x02, 0x61, 0x63, 
+            0x02, 0x62, 0x65, 
+            0x03, 0x63, 0x6f, 0x6d, 
+            0x00, 
+            0x00, 0x01, 
+            0x00, 0x01,
+            // q2
+            0x03, 0x76, 0x75, 0x62,
+            0x02, 0x61, 0x63, 
+            0x02, 0x62, 0x65, 
+            0x03, 0x63, 0x6f, 0x6d, 
+            0x00, 
+            0x00, 0x01, 
+            0x00, 0x01
+            
+        ];
+
+        var bitsInRequest = new BitArray(bytesInRequest);
+        var dnsMessageRequest = DnsMessage.Parse(bitsInRequest);
+
+        var bytesOutRequest = dnsMessageRequest.ToBytes();
+        var bitsOutRequest = new BitArray(bytesOutRequest);
+
+        Assert.That(dnsMessageRequest.Header.QuestionCount, Is.EqualTo(2));
+    }
 }

@@ -51,8 +51,8 @@ public class CompressionTest
     [Test]
     public void TestQuestions()
     {
-        Assert.That(DnsMessageRequest.Questions.Count, Is.EqualTo(1));
-        var question = DnsMessageRequest.Questions[0];
-        Assert.That(question.Name, Is.EqualTo("vub.ac.be.com"));
+        Assert.That(DnsMessageRequest.Header.QuestionCount, Is.EqualTo(2));
+        Assert.That(DnsMessageRequest.Questions[0].Name, Is.EqualTo("abc.longassdomainname.com"));
+        Assert.That(DnsMessageRequest.Questions[1].Name, Is.EqualTo("def.longassdomainname.com"));
     }
 }
