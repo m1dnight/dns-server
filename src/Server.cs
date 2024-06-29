@@ -33,8 +33,19 @@ internal class Program
             var input = new BitArray(receivedData);
             var dnsMessage = DnsMessage.Parse(input);
 
-            dnsMessage = CreateDnsMessage();
-
+            dnsMessage.Header.QueryResponseIndicator = true;
+            dnsMessage.Header.AuthoritativeAnswer = false;
+            dnsMessage.Header.Truncation = false;
+            dnsMessage.Header.RecursionAvailable = false; 
+            dnsMessage.Header.ResponseCode = 4;
+            dnsMessage.Header.AnswerRecordCount = 1;
+            
+            dnsMessage.Answers = new List<Answer>
+            {
+                new Answer("codecrafters.io", 1, 1, 60, 4, new byte[] { 0x08, 0x08, 0x08, 0x08 })
+            };
+            
+            
             // Send response
             var output = dnsMessage.ToBytes();
             
